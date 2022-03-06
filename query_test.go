@@ -54,3 +54,20 @@ func TestParseTag(t *testing.T) {
 	assertEqual(t, options["type"], "varchar(100)")
 	assertEqual(t, options["uniq"], "")
 }
+
+func TestNewCacheGet(t *testing.T) {
+	cache := newCache(defaultTag)
+	var q QueryA
+	s := cache.get(reflect.TypeOf(q))
+	assertNotEqual(t, s, nil)
+	s2 := cache.get(reflect.TypeOf(q))
+	assertEqual(t, s, s2)
+}
+
+func TestIndirectType(t *testing.T) {
+	var q *QueryA
+	t1 := indirectType(reflect.TypeOf(q))
+	var q2 QueryA
+	t2 := indirectType(reflect.TypeOf(q2))
+	assertEqual(t, t1, t2)
+}
