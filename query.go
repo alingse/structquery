@@ -2,6 +2,7 @@ package structquery
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 
 	"gorm.io/gorm/clause"
@@ -38,7 +39,10 @@ func (q *Queryer) Register(qt QueryType, fn FieldQueryer) {
 	q.queryFns[qt] = fn
 }
 
-var ErrBadQuery = errors.New("structquery: query must be a pointer to struct")
+var (
+	ErrBadQueryValue = errors.New("structquery: query must be a pointer to struct")
+	ErrBadQueryType  = errors.New("structquery: query type not registered")
+)
 
 func (q *Queryer) And(queryValue interface{}) (clause.Expression, error) {
 	exprs, err := q.toExprs(queryValue)
@@ -59,10 +63,10 @@ func (q *Queryer) Or(queryValue interface{}) (clause.Expression, error) {
 func (q *Queryer) toExprs(query interface{}) ([]clause.Expression, error) {
 	v := reflect.ValueOf(query)
 	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
-		return nil, ErrBadQuery
+		return nil, ErrBadQueryValue
 	}
 	queryValue := v.Elem()
-	stInfo := q.cache.get(v.Type())
+	stInfo := q.cache.get(queryValue.Type())
 	return q.bindStructInfo(stInfo, queryValue)
 }
 
@@ -72,7 +76,7 @@ func (q *Queryer) bindStructInfo(st *structInfo, queryValue reflect.Value) ([]cl
 		queryType := QueryType(field.query)
 		fn, ok := q.queryFns[queryType]
 		if !ok {
-			return nil, errors.New("structquery: query type not registered")
+			return nil, fmt.Errorf("%w:%s ", ErrBadQueryType, queryType)
 		}
 
 		v := queryValue.Field(0).Interface()

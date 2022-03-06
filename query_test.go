@@ -1,6 +1,7 @@
 package structquery
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -70,4 +71,63 @@ func TestIndirectType(t *testing.T) {
 	var q2 QueryA
 	t2 := indirectType(reflect.TypeOf(q2))
 	assertEqual(t, t1, t2)
+}
+
+func TestNewQueryer(t *testing.T) {
+	queryer := NewQueryer()
+	assertNotEqual(t, queryer, nil)
+}
+
+type UserQuery struct {
+	Name           string `sq:"like"`
+	Email          string `sq:"eq"`
+	ID             int    `sq:""`
+	CreatedAtStart int64  `sq:"gte;column:created_at"`
+	CreatedAtEnd   int64  `sq:"lt;column:created_at"`
+	Tag            string `sq:"json_extract_like;column:tags;json_path:$[*].name"`
+}
+
+func TestNewQueryerWithAnd(t *testing.T) {
+	queryer := NewQueryer()
+	assertNotEqual(t, queryer, nil)
+	var q = UserQuery{
+		Name:           "hello",
+		Email:          "",
+		ID:             0,
+		CreatedAtStart: 1000000,
+		CreatedAtEnd:   2000000,
+		Tag:            "gorm",
+	}
+	exprs, err := queryer.toExprs(&q)
+	assertEqual(t, err, nil)
+	assertNotEqual(t, exprs, nil)
+
+	expr, err := queryer.And(&q)
+	assertEqual(t, err, nil)
+	assertNotEqual(t, expr, nil)
+
+	expr, err = queryer.Or(&q)
+	assertEqual(t, err, nil)
+	assertNotEqual(t, expr, nil)
+}
+
+func TestNewQueryerWithError(t *testing.T) {
+	queryer := NewQueryer()
+
+	var q UserQuery
+	_, err := queryer.toExprs(q)
+	assertEqual(t, err, ErrBadQueryValue)
+
+	_, err = queryer.And(q)
+	assertEqual(t, err, ErrBadQueryValue)
+
+	_, err = queryer.Or(q)
+	assertEqual(t, err, ErrBadQueryValue)
+
+	var q2 struct {
+		Name string `sq:"not_exist"`
+	}
+	_, err = queryer.toExprs(&q2)
+	assertTrue(t, err != nil)
+	assertTrue(t, errors.Is(err, ErrBadQueryType))
 }
