@@ -84,7 +84,7 @@ type UserQuery struct {
 	ID             int    `sq:""`
 	CreatedAtStart int64  `sq:"gte;column:created_at"`
 	CreatedAtEnd   int64  `sq:"lt;column:created_at"`
-	Tag            string `sq:"json_extract_like;column:tags;json_path:$[*].name"`
+	Tag            string `sq:"json_extract_like;column:tags;path:$[*].name"`
 }
 
 func TestNewQueryerWithAnd(t *testing.T) {
@@ -130,4 +130,28 @@ func TestNewQueryerWithError(t *testing.T) {
 	_, err = queryer.toExprs(&q2)
 	assertTrue(t, err != nil)
 	assertTrue(t, errors.Is(err, ErrBadQueryType))
+}
+
+func TestMoreBuiltin(t *testing.T) {
+	queryer := NewQueryer()
+	var q = struct {
+		Tag            string `sq:"my_json_contains;column:tags;path:$.name"`
+		Location       string `sq:"json_extract_eq;column:locations;path:$.name"`
+		FilterID       int    `sq:"neq;column:id"`
+		NameStart      string `sq:"llike;column:name"`
+		NameEnd        string `sq:"rlike;column:name"`
+		LastVisitStart int64  `sq:"gt;column:last_visit"`
+		LastVisitEnd   int64  `sq:"lte;column:last_visit"`
+	}{
+		Tag:            "gorm",
+		Location:       "Tokyo",
+		FilterID:       100,
+		NameStart:      "h",
+		NameEnd:        "d",
+		LastVisitStart: 1000000,
+		LastVisitEnd:   2000000,
+	}
+	expr, err := queryer.And(&q)
+	assertEqual(t, err, nil)
+	assertNotEqual(t, expr, nil)
 }

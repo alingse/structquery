@@ -78,15 +78,18 @@ func (q *Queryer) bindStructInfo(st *structInfo, queryValue reflect.Value) ([]cl
 		if !ok {
 			return nil, fmt.Errorf("%w:%s ", ErrBadQueryType, queryType)
 		}
-
-		v := queryValue.Field(0).Interface()
+		valueField := queryValue.Field(0)
+		if valueField.IsZero() {
+			continue
+		}
+		value := valueField.Interface()
 		meta := FieldMeta{
 			Type:       field.typ,
 			ColumnName: q.namer.ColumnName("", field.name),
 			QueryType:  queryType,
 			Options:    field.options,
 		}
-		expr := fn(Field{FieldMeta: meta, Value: v})
+		expr := fn(Field{FieldMeta: meta, Value: value})
 		if expr != nil {
 			exprs = append(exprs, expr)
 		}
