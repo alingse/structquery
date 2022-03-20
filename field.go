@@ -12,7 +12,7 @@ type FieldMeta struct {
 	QueryType          QueryType
 	Options            map[string]string
 	FieldName          string
-	FieldCanonicalName string // A.B.C
+	FieldCanonicalName string // like A.B.C
 }
 
 type fieldInfo struct {
@@ -27,6 +27,64 @@ type fieldInfo struct {
 
 type structInfo struct {
 	fields []*fieldInfo
+}
+
+type fieldWithValue struct {
+	*fieldInfo
+	value interface{}
+}
+
+func parse(value interface{}) ([]*fieldWithValue, error) {
+	v := reflect.ValueOf(value)
+	v = indirectValue(v)
+	if v.Kind() != reflect.Struct {
+		return nil, ErrBadQueryValue
+	}
+	fields := parseStruct(v.Type(), v, "")
+	return fields, nil
+}
+
+func indirectValue(value reflect.Value) reflect.Value {
+	if value.Kind() == reflect.Ptr {
+		return indirectValue(value)
+	}
+	return value
+}
+
+func parseStruct(typ reflect.Type, value reflect.Value, parentName string) []*fieldWithValue {
+	parentName := typ.Name()
+	var fields []*fieldWithValue
+	for i := 0; i < typ.NumField(); i++ {
+		f := typ.Field(i)
+		fv := value.Field(i)
+		filedInfo := structFieldTofiledInfo(f, "")
+
+		fields = append(fields, &fieldWithValue{
+			fieldInfo: c.get(typ).fields[i],
+			value:     fv.Interface(),
+		})
+	}
+	return nil
+}
+
+func structFieldTofiledInfo(field reflect.StructField, parentName string) *fieldInfo {
+	tag := field.Tag.Get(defaultTag)
+	query, options := parseTag(tag)
+
+	canonicalName := field.Name
+	if parentName != "" {
+		canonicalName = parentName + "." + field.Name
+	}
+
+	return &fieldInfo{
+		typ:           field.Type,
+		name:          field.Name,
+		isAnonymous:   field.Anonymous,
+		canonicalName: canonicalName,
+		tag:           tag,
+		query:         query,
+		options:       options,
+	}
 }
 
 // ----------------------------------------------------------------------------
