@@ -56,18 +56,22 @@ func parseStruct(typ reflect.Type, value reflect.Value, parentName string) []*fi
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := value.Field(i)
-		filedsMeta := structFieldTofiledInfo(f, "")
 		if typ.Kind() == reflect.Ptr && fv.IsNil() {
 			continue
 		}
 		if fv.IsZero() {
 			continue
 		}
-
-		fields = append(fields, &fieldWithValue{
-			fieldInfo: filedsMeta,
-			value:     fv.Interface(),
-		})
+		filedMeta := structFieldTofiledInfo(f, "")
+		if filedMeta.query == "" && filedMeta.isAnonymous {
+			anonymousFields := parseStruct(f.Type, fv, parentName)
+			fields = append(fields, anonymousFields...)
+		} else {
+			fields = append(fields, &fieldWithValue{
+				fieldInfo: filedMeta,
+				value:     fv.Interface(),
+			})
+		}
 	}
 	return fields
 }
