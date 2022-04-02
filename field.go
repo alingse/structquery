@@ -6,13 +6,12 @@ import (
 )
 
 type fieldInfo struct {
-	typ           reflect.Type
-	name          string
-	canonicalName string
-	isAnonymous   bool
-	tag           string
-	query         string
-	options       map[string]string
+	typ         reflect.Type
+	name        string
+	isAnonymous bool
+	tag         string
+	query       string
+	options     map[string]string
 }
 
 type fieldWithValue struct {

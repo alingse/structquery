@@ -10,15 +10,15 @@ import (
 )
 
 type FieldMeta struct {
-	Type       reflect.Type
-	ColumnName string
-	QueryType  QueryType
-	Options    map[string]string
-	FieldName  string
+	Type      reflect.Type
+	QueryType QueryType
+	Options   map[string]string
+	FieldName string
 }
 
 type Field struct {
 	FieldMeta
+	ColumnName string
 	Value      interface{}
 	FieldValue reflect.Value
 }
@@ -87,14 +87,14 @@ func (q *Queryer) translate(fields []*fieldWithValue) ([]clause.Expression, erro
 			return nil, fmt.Errorf("%w:%s ", ErrBadQueryType, queryType)
 		}
 		meta := FieldMeta{
-			Type:       field.typ,
-			ColumnName: q.namer.ColumnName("", field.name),
-			QueryType:  queryType,
-			Options:    field.options,
+			Type:      field.typ,
+			QueryType: queryType,
+			Options:   field.options,
 		}
 
 		f := Field{
 			FieldMeta:  meta,
+			ColumnName: q.namer.ColumnName("", field.name),
 			Value:      field.value,
 			FieldValue: field.fieldValue,
 		}

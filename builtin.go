@@ -30,25 +30,25 @@ func RegisterBuiltin(q *Queryer) {
 	q.Register(EqQueryType, EqQueryer)
 	q.Register(NeqQueryType, func(f Field) clause.Expression {
 		return clause.Neq{
-			Column: f.FieldMeta.ColumnName,
+			Column: f.ColumnName,
 			Value:  f.Value,
 		}
 	})
 	q.Register(LikeQueryType, func(f Field) clause.Expression {
 		return clause.Like{
-			Column: f.FieldMeta.ColumnName,
+			Column: f.ColumnName,
 			Value:  `%` + fmt.Sprintf("%v", f.Value) + `%`,
 		}
 	})
 	q.Register(LLikeQueryType, func(f Field) clause.Expression {
 		return clause.Like{
-			Column: f.FieldMeta.ColumnName,
+			Column: f.ColumnName,
 			Value:  `%` + fmt.Sprintf("%v", f.Value),
 		}
 	})
 	q.Register(RLikeQueryType, func(f Field) clause.Expression {
 		return clause.Like{
-			Column: f.FieldMeta.ColumnName,
+			Column: f.ColumnName,
 			Value:  fmt.Sprintf("%v", f.Value) + `%`,
 		}
 	})
@@ -56,25 +56,25 @@ func RegisterBuiltin(q *Queryer) {
 	q.Register(NotInQueryType, NeqQueryer)
 	q.Register(GtQueryType, func(f Field) clause.Expression {
 		return clause.Gt{
-			Column: f.FieldMeta.ColumnName,
+			Column: f.ColumnName,
 			Value:  f.Value,
 		}
 	})
 	q.Register(GteQueryType, func(f Field) clause.Expression {
 		return clause.Gte{
-			Column: f.FieldMeta.ColumnName,
+			Column: f.ColumnName,
 			Value:  f.Value,
 		}
 	})
 	q.Register(LtQueryType, func(f Field) clause.Expression {
 		return clause.Lt{
-			Column: f.FieldMeta.ColumnName,
+			Column: f.ColumnName,
 			Value:  f.Value,
 		}
 	})
 	q.Register(LteQueryType, func(f Field) clause.Expression {
 		return clause.Lte{
-			Column: f.FieldMeta.ColumnName,
+			Column: f.ColumnName,
 			Value:  f.Value,
 		}
 	})
@@ -88,14 +88,14 @@ func RegisterBuiltin(q *Queryer) {
 
 func EqQueryer(field Field) clause.Expression {
 	return clause.Eq{
-		Column: field.FieldMeta.ColumnName,
+		Column: field.ColumnName,
 		Value:  field.Value,
 	}
 }
 
 func NeqQueryer(field Field) clause.Expression {
 	return clause.Neq{
-		Column: field.FieldMeta.ColumnName,
+		Column: field.ColumnName,
 		Value:  field.Value,
 	}
 }
@@ -105,7 +105,7 @@ func JSONExtractEqQueryer(field Field) clause.Expression {
 	if jsonPath == "" {
 		return nil
 	}
-	sql := fmt.Sprintf("JSON_EXTRACT(%s, '%s') = ?", field.FieldMeta.ColumnName, jsonPath)
+	sql := fmt.Sprintf("JSON_EXTRACT(%s, '%s') = ?", field.ColumnName, jsonPath)
 	var values = []interface{}{field.Value}
 	return clause.NamedExpr{
 		SQL:  sql,
@@ -118,7 +118,7 @@ func JSONExtractLikeQueryer(field Field) clause.Expression {
 	if jsonPath == "" {
 		return nil
 	}
-	sql := fmt.Sprintf("JSON_EXTRACT(%s, '%s') LIKE ?", field.FieldMeta.ColumnName, jsonPath)
+	sql := fmt.Sprintf("JSON_EXTRACT(%s, '%s') LIKE ?", field.ColumnName, jsonPath)
 	var values = []interface{}{`%` + fmt.Sprintf("%v", field.Value) + `%`}
 	return clause.NamedExpr{
 		SQL:  sql,
@@ -131,9 +131,9 @@ func MySQLJSONContainsQueryer(field Field) clause.Expression {
 
 	var sql string
 	if jsonPath == "" {
-		sql = fmt.Sprintf("JSON_CONTAINS(%s, ?)", field.FieldMeta.ColumnName)
+		sql = fmt.Sprintf("JSON_CONTAINS(%s, ?)", field.ColumnName)
 	} else {
-		sql = fmt.Sprintf("JSON_CONTAINS(%s, ?, '%s')", field.FieldMeta.ColumnName, jsonPath)
+		sql = fmt.Sprintf("JSON_CONTAINS(%s, ?, '%s')", field.ColumnName, jsonPath)
 	}
 	var values = []interface{}{field.Value}
 	return clause.NamedExpr{
