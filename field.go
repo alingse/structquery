@@ -64,7 +64,8 @@ func parseStruct(typ reflect.Type, value reflect.Value, parentName string) []*fi
 		}
 		filedMeta := structFieldTofiledInfo(f, "")
 		if filedMeta.query == "" && filedMeta.isAnonymous {
-			anonymousFields := parseStruct(f.Type, fv, parentName)
+			fv := indirectValue(fv)
+			anonymousFields := parseStruct(fv.Type(), fv, parentName)
 			fields = append(fields, anonymousFields...)
 		} else {
 			fields = append(fields, &fieldWithValue{

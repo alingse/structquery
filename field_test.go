@@ -96,3 +96,26 @@ func TestComplexQuery1(t *testing.T) {
 	assertEqual(t, fields[1].name, "ItemID")
 	assertEqual(t, fields[1].value, int64(1))
 }
+
+type complexQuery2 struct {
+	*complexQuery
+}
+
+func TestComplexQuery2(t *testing.T) {
+	var q = complexQuery2{
+		complexQuery: &complexQuery{
+			simpleQuery: simpleQuery{
+				Email: "hello",
+				Name:  "world",
+			},
+		},
+	}
+
+	fields, err := parse(q)
+	assertEqual(t, err, nil)
+	assertEqual(t, len(fields), 2)
+	assertEqual(t, fields[0].name, "Email")
+	assertEqual(t, fields[0].value, "hello")
+	assertEqual(t, fields[1].name, "Name")
+	assertEqual(t, fields[1].value, "world")
+}
