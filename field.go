@@ -17,7 +17,8 @@ type fieldInfo struct {
 
 type fieldWithValue struct {
 	*fieldInfo
-	value interface{}
+	value      interface{}
+	fieldValue reflect.Value
 }
 
 func parseValue(value interface{}) ([]*fieldWithValue, error) {
@@ -62,8 +63,9 @@ func parseStruct(value reflect.Value) []*fieldWithValue {
 		}
 
 		fields = append(fields, &fieldWithValue{
-			fieldInfo: filedMeta,
-			value:     fv.Interface(),
+			fieldInfo:  filedMeta,
+			value:      fv.Interface(),
+			fieldValue: fv,
 		})
 	}
 	return fields

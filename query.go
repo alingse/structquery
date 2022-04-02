@@ -93,7 +93,12 @@ func (q *Queryer) translate(fields []*fieldWithValue) ([]clause.Expression, erro
 			Options:    field.options,
 		}
 
-		expr := fn(Field{FieldMeta: meta, Value: field.value})
+		f := Field{
+			FieldMeta:  meta,
+			Value:      field.value,
+			FieldValue: field.fieldValue,
+		}
+		expr := fn(f)
 		if expr != nil {
 			exprs = append(exprs, expr)
 		}
