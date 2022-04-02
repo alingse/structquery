@@ -3,14 +3,24 @@ package structquery
 import (
 	"errors"
 	"fmt"
+	"reflect"
 
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 )
 
+type FieldMeta struct {
+	Type       reflect.Type
+	ColumnName string
+	QueryType  QueryType
+	Options    map[string]string
+	FieldName  string
+}
+
 type Field struct {
 	FieldMeta
-	Value interface{}
+	Value      interface{}
+	FieldValue reflect.Value
 }
 
 type QueryType string

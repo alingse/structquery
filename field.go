@@ -5,15 +5,6 @@ import (
 	"strings"
 )
 
-type FieldMeta struct {
-	Type               reflect.Type
-	ColumnName         string
-	QueryType          QueryType
-	Options            map[string]string
-	FieldName          string
-	FieldCanonicalName string // like A.B.C
-}
-
 type fieldInfo struct {
 	typ           reflect.Type
 	name          string
