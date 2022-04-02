@@ -47,7 +47,7 @@ func parseStruct(value reflect.Value) []*fieldWithValue {
 			continue
 		}
 
-		filedMeta := structFieldTofiledInfo(f)
+		filedMeta := toFieldInfo(f)
 		if filedMeta.query == "" && filedMeta.isAnonymous {
 			fv = indirectValue(fv)
 			if fv.Type().Kind() == reflect.Struct {
@@ -69,7 +69,7 @@ func parseStruct(value reflect.Value) []*fieldWithValue {
 	return fields
 }
 
-func structFieldTofiledInfo(field reflect.StructField) *fieldInfo {
+func toFieldInfo(field reflect.StructField) *fieldInfo {
 	tag := field.Tag.Get(defaultTag)
 	query, options := parseTag(tag)
 	return &fieldInfo{
