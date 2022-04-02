@@ -38,12 +38,12 @@ func indirectValue(value reflect.Value) reflect.Value {
 }
 
 func parseStruct(value reflect.Value) []*fieldWithValue {
-	typ := value.Type()
-	var fields []*fieldWithValue
-	for i := 0; i < typ.NumField(); i++ {
-		f := typ.Field(i)
+	valueType := value.Type()
+	var fields = make([]*fieldWithValue, 0, valueType.NumField())
+	for i := 0; i < valueType.NumField(); i++ {
+		f := valueType.Field(i)
 		fv := value.Field(i)
-		if typ.Kind() == reflect.Ptr && fv.IsNil() {
+		if valueType.Kind() == reflect.Ptr && fv.IsNil() {
 			continue
 		}
 
