@@ -15,10 +15,6 @@ type fieldInfo struct {
 	options       map[string]string
 }
 
-type structInfo struct {
-	fields []*fieldInfo
-}
-
 type fieldWithValue struct {
 	*fieldInfo
 	value interface{}
