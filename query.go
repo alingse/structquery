@@ -17,7 +17,6 @@ type QueryType string
 type FieldQueryer func(Field) clause.Expression
 
 type Queryer struct {
-	cache    *cache
 	queryFns map[QueryType]FieldQueryer
 	namer    schema.Namer
 }
@@ -26,7 +25,6 @@ const defaultTag = `sq`
 
 func NewQueryer() *Queryer {
 	q := &Queryer{
-		cache:    newCache(defaultTag),
 		queryFns: make(map[QueryType]FieldQueryer),
 		namer:    schema.NamingStrategy{},
 	}
