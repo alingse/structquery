@@ -41,7 +41,7 @@ func TestParseWithValue(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		fields, err := parse(c.query)
+		fields, err := parseValue(c.query)
 		assertEqual(t, err, c.err)
 		assertEqual(t, len(fields), c.length, c)
 	}
@@ -53,7 +53,7 @@ func TestParseBase(t *testing.T) {
 		Email: "hello",
 	}
 
-	fields, err := parse(q)
+	fields, err := parseValue(q)
 	assertEqual(t, err, nil)
 	assertEqual(t, len(fields), 1)
 	assertEqual(t, fields[0].name, "Email")
@@ -68,7 +68,7 @@ func TestParseBaseV1(t *testing.T) {
 		Email: "hello",
 	}
 
-	fields, err := parse(q)
+	fields, err := parseValue(q)
 	assertEqual(t, err, nil)
 	assertEqual(t, len(fields), 1)
 	assertEqual(t, fields[0].name, "Email")
@@ -88,7 +88,7 @@ func TestComplexQuery1(t *testing.T) {
 		ItemID: 1,
 	}
 
-	fields, err := parse(q)
+	fields, err := parseValue(q)
 	assertEqual(t, err, nil)
 	assertEqual(t, len(fields), 2)
 	assertEqual(t, fields[0].name, "Email")
@@ -111,7 +111,7 @@ func TestComplexQuery2(t *testing.T) {
 		},
 	}
 
-	fields, err := parse(q)
+	fields, err := parseValue(q)
 	assertEqual(t, err, nil)
 	assertEqual(t, len(fields), 2)
 	assertEqual(t, fields[0].name, "Email")
@@ -130,7 +130,7 @@ func TestComplexQuery3(t *testing.T) {
 		ItemID: 0,
 	}
 
-	fields, err := parse(q)
+	fields, err := parseValue(q)
 	assertEqual(t, err, nil)
 	assertEqual(t, len(fields), 0, fields)
 }
@@ -145,7 +145,7 @@ func TestComplexQuery3Case1(t *testing.T) {
 		ItemID: &itemID,
 	}
 
-	fields, err := parse(q)
+	fields, err := parseValue(q)
 	assertEqual(t, err, nil)
 	assertEqual(t, len(fields), 1, fields)
 }

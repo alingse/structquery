@@ -68,14 +68,14 @@ func (q *Queryer) Or(queryValue interface{}) (clause.Expression, error) {
 }
 
 func (q *Queryer) toExprs(query interface{}) ([]clause.Expression, error) {
-	fields, err := parse(query)
+	fields, err := parseValue(query)
 	if err != nil {
 		return nil, err
 	}
-	return q.bindStructInfo(fields)
+	return q.translate(fields)
 }
 
-func (q *Queryer) bindStructInfo(fields []*fieldWithValue) ([]clause.Expression, error) {
+func (q *Queryer) translate(fields []*fieldWithValue) ([]clause.Expression, error) {
 	var exprs []clause.Expression
 	for _, field := range fields {
 		if field.query == "" {

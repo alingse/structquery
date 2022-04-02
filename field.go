@@ -20,7 +20,7 @@ type fieldWithValue struct {
 	value interface{}
 }
 
-func parse(value interface{}) ([]*fieldWithValue, error) {
+func parseValue(value interface{}) ([]*fieldWithValue, error) {
 	v := reflect.ValueOf(value)
 	v = indirectValue(v)
 	if v.Kind() != reflect.Struct {
