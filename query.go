@@ -3,7 +3,6 @@ package structquery
 import (
 	"errors"
 	"fmt"
-	"reflect"
 
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
@@ -61,35 +60,32 @@ func (q *Queryer) Or(queryValue interface{}) (clause.Expression, error) {
 }
 
 func (q *Queryer) toExprs(query interface{}) ([]clause.Expression, error) {
-	v := reflect.ValueOf(query)
-	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
-		return nil, ErrBadQueryValue
+	fields, err := parse(query)
+	if err != nil {
+		return nil, err
 	}
-	queryValue := v.Elem()
-	stInfo := q.cache.get(queryValue.Type())
-	return q.bindStructInfo(stInfo, queryValue)
+	return q.bindStructInfo(fields)
 }
 
-func (q *Queryer) bindStructInfo(st *structInfo, queryValue reflect.Value) ([]clause.Expression, error) {
+func (q *Queryer) bindStructInfo(fields []*fieldWithValue) ([]clause.Expression, error) {
 	var exprs []clause.Expression
-	for _, field := range st.fields {
+	for _, field := range fields {
+		if field.query == "" {
+			continue
+		}
 		queryType := QueryType(field.query)
 		fn, ok := q.queryFns[queryType]
 		if !ok {
 			return nil, fmt.Errorf("%w:%s ", ErrBadQueryType, queryType)
 		}
-		valueField := queryValue.Field(0)
-		if valueField.IsZero() {
-			continue
-		}
-		value := valueField.Interface()
 		meta := FieldMeta{
 			Type:       field.typ,
 			ColumnName: q.namer.ColumnName("", field.name),
 			QueryType:  queryType,
 			Options:    field.options,
 		}
-		expr := fn(Field{FieldMeta: meta, Value: value})
+
+		expr := fn(Field{FieldMeta: meta, Value: field.value})
 		if expr != nil {
 			exprs = append(exprs, expr)
 		}

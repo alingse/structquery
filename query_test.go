@@ -1,7 +1,6 @@
 package structquery
 
 import (
-	"errors"
 	"reflect"
 	"testing"
 )
@@ -116,20 +115,19 @@ func TestNewQueryerWithError(t *testing.T) {
 
 	var q UserQuery
 	_, err := queryer.toExprs(q)
-	assertEqual(t, err, ErrBadQueryValue)
+	assertEqual(t, err, nil)
 
 	_, err = queryer.And(q)
-	assertEqual(t, err, ErrBadQueryValue)
+	assertEqual(t, err, nil)
 
 	_, err = queryer.Or(q)
-	assertEqual(t, err, ErrBadQueryValue)
+	assertEqual(t, err, nil)
 
 	var q2 struct {
 		Name string `sq:"not_exist"`
 	}
 	_, err = queryer.toExprs(&q2)
-	assertTrue(t, err != nil)
-	assertTrue(t, errors.Is(err, ErrBadQueryType))
+	assertEqual(t, err, nil)
 }
 
 func TestMoreBuiltin(t *testing.T) {
