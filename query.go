@@ -27,8 +27,8 @@ type QueryType string
 type FieldQueryer func(Field) clause.Expression
 
 type Queryer struct {
+	Namer    schema.Namer
 	queryFns map[QueryType]FieldQueryer
-	namer    schema.Namer
 }
 
 const defaultTag = `sq`
@@ -36,7 +36,7 @@ const defaultTag = `sq`
 func NewQueryer() *Queryer {
 	q := &Queryer{
 		queryFns: make(map[QueryType]FieldQueryer),
-		namer:    schema.NamingStrategy{},
+		Namer:    schema.NamingStrategy{}, // default gorm namer
 	}
 	RegisterBuiltin(q)
 	return q
@@ -94,7 +94,7 @@ func (q *Queryer) translate(fields []*fieldWithValue) ([]clause.Expression, erro
 
 		f := Field{
 			FieldMeta:  meta,
-			ColumnName: q.namer.ColumnName("", field.name),
+			ColumnName: q.Namer.ColumnName("", field.name),
 			Value:      field.value,
 			FieldValue: field.fieldValue,
 		}
