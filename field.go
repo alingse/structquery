@@ -40,7 +40,7 @@ func parse(value interface{}) ([]*fieldWithValue, error) {
 	if v.Kind() != reflect.Struct {
 		return nil, ErrBadQueryValue
 	}
-	fields := parseStruct(v.Type(), v, "")
+	fields := parseStruct(v.Type(), v)
 	return fields, nil
 }
 
@@ -51,7 +51,7 @@ func indirectValue(value reflect.Value) reflect.Value {
 	return value
 }
 
-func parseStruct(typ reflect.Type, value reflect.Value, parentName string) []*fieldWithValue {
+func parseStruct(typ reflect.Type, value reflect.Value) []*fieldWithValue {
 	var fields []*fieldWithValue
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
@@ -62,10 +62,10 @@ func parseStruct(typ reflect.Type, value reflect.Value, parentName string) []*fi
 		if fv.IsZero() {
 			continue
 		}
-		filedMeta := structFieldTofiledInfo(f, "")
+		filedMeta := structFieldTofiledInfo(f)
 		if filedMeta.query == "" && filedMeta.isAnonymous {
 			fv := indirectValue(fv)
-			anonymousFields := parseStruct(fv.Type(), fv, parentName)
+			anonymousFields := parseStruct(fv.Type(), fv)
 			fields = append(fields, anonymousFields...)
 		} else {
 			fields = append(fields, &fieldWithValue{
@@ -77,23 +77,16 @@ func parseStruct(typ reflect.Type, value reflect.Value, parentName string) []*fi
 	return fields
 }
 
-func structFieldTofiledInfo(field reflect.StructField, parentName string) *fieldInfo {
+func structFieldTofiledInfo(field reflect.StructField) *fieldInfo {
 	tag := field.Tag.Get(defaultTag)
 	query, options := parseTag(tag)
-
-	canonicalName := field.Name
-	if parentName != "" {
-		canonicalName = parentName + "." + field.Name
-	}
-
 	return &fieldInfo{
-		typ:           field.Type,
-		name:          field.Name,
-		isAnonymous:   field.Anonymous,
-		canonicalName: canonicalName,
-		tag:           tag,
-		query:         query,
-		options:       options,
+		typ:         field.Type,
+		name:        field.Name,
+		isAnonymous: field.Anonymous,
+		tag:         tag,
+		query:       query,
+		options:     options,
 	}
 }
 
