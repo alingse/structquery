@@ -15,7 +15,7 @@ func assertTrue(t *testing.T, b bool, messages ...interface{}) {
 func assertEqual(t *testing.T, a, b interface{}, messages ...interface{}) {
 	t.Helper()
 	if !reflect.DeepEqual(a, b) {
-		t.Errorf("assertEqual faild: %#v != %#v with messages: %#v ", a, b, messages)
+		t.Errorf("assertEqual faild: %#v != %#v with messages: %#v", a, b, messages)
 	}
 }
 

@@ -119,3 +119,33 @@ func TestComplexQuery2(t *testing.T) {
 	assertEqual(t, fields[1].name, "Name")
 	assertEqual(t, fields[1].value, "world")
 }
+
+type ItemID int64
+type complexQuery3 struct {
+	ItemID
+}
+
+func TestComplexQuery3(t *testing.T) {
+	var q = complexQuery3{
+		ItemID: 0,
+	}
+
+	fields, err := parse(q)
+	assertEqual(t, err, nil)
+	assertEqual(t, len(fields), 0, fields)
+}
+
+type complexQuery4 struct {
+	ItemID *ItemID
+}
+
+func TestComplexQuery3Case1(t *testing.T) {
+	var itemID ItemID = 0
+	var q = complexQuery4{
+		ItemID: &itemID,
+	}
+
+	fields, err := parse(q)
+	assertEqual(t, err, nil)
+	assertEqual(t, len(fields), 1, fields)
+}
