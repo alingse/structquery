@@ -5,17 +5,17 @@ import (
 	"testing"
 )
 
-func assertTrue(t *testing.T, b bool, args ...interface{}) {
+func assertTrue(t *testing.T, b bool, messages ...interface{}) {
 	t.Helper()
 	if !b {
-		t.Errorf("assertTrue faild args %+v", args)
+		t.Errorf("assertTrue faild with messages %#v", messages)
 	}
 }
 
-func assertEqual(t *testing.T, a, b interface{}) {
+func assertEqual(t *testing.T, a, b interface{}, messages ...interface{}) {
 	t.Helper()
 	if !reflect.DeepEqual(a, b) {
-		t.Errorf("assertEqual faild: %#v != %#v", a, b)
+		t.Errorf("assertEqual faild: %#v != %#v with messages: %#v ", a, b, messages)
 	}
 }
 

@@ -46,25 +46,30 @@ func parse(value interface{}) ([]*fieldWithValue, error) {
 
 func indirectValue(value reflect.Value) reflect.Value {
 	if value.Kind() == reflect.Ptr {
-		return indirectValue(value)
+		return indirectValue(value.Elem())
 	}
 	return value
 }
 
 func parseStruct(typ reflect.Type, value reflect.Value, parentName string) []*fieldWithValue {
-	parentName := typ.Name()
 	var fields []*fieldWithValue
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := value.Field(i)
-		filedInfo := structFieldTofiledInfo(f, "")
+		filedsMeta := structFieldTofiledInfo(f, "")
+		if typ.Kind() == reflect.Ptr && fv.IsNil() {
+			continue
+		}
+		if fv.IsZero() {
+			continue
+		}
 
 		fields = append(fields, &fieldWithValue{
-			fieldInfo: c.get(typ).fields[i],
+			fieldInfo: filedsMeta,
 			value:     fv.Interface(),
 		})
 	}
-	return nil
+	return fields
 }
 
 func structFieldTofiledInfo(field reflect.StructField, parentName string) *fieldInfo {
