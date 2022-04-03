@@ -10,10 +10,11 @@ import (
 )
 
 type FieldMeta struct {
-	Type      reflect.Type
-	QueryType QueryType
-	Options   map[string]string
-	FieldName string
+	Type        reflect.Type
+	QueryType   QueryType
+	Options     map[string]string
+	FieldName   string
+	IsAnonymous bool
 }
 
 type Field struct {
@@ -90,6 +91,7 @@ func (q *Queryer) translate(fields []*fieldWithValue) ([]clause.Expression, erro
 			Type:      field.typ,
 			QueryType: queryType,
 			Options:   field.options,
+			FieldName: field.name,
 		}
 
 		f := Field{
