@@ -26,25 +26,25 @@ type Field struct {
 }
 
 type QueryType string
-type FieldQueryer func(Field) clause.Expression
+type QueryerFunc func(Field) clause.Expression
 
 type Queryer struct {
 	Namer    schema.Namer
-	queryFns map[QueryType]FieldQueryer
+	queryFns map[QueryType]QueryerFunc
 }
 
 const defaultTag = `sq`
 
 func NewQueryer() *Queryer {
 	q := &Queryer{
-		queryFns: make(map[QueryType]FieldQueryer),
+		queryFns: make(map[QueryType]QueryerFunc),
 		Namer:    schema.NamingStrategy{}, // default gorm namer
 	}
 	RegisterBuiltin(q)
 	return q
 }
 
-func (q *Queryer) Register(qt QueryType, fn FieldQueryer) {
+func (q *Queryer) Register(qt QueryType, fn QueryerFunc) {
 	q.queryFns[qt] = fn
 }
 
