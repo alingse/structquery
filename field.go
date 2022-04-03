@@ -15,7 +15,6 @@ type FieldMeta struct {
 type Field struct {
 	FieldMeta
 	Value      interface{}
-	FieldValue reflect.Value
 	ColumnName string // TODO: add read from options
 }
 
@@ -63,9 +62,8 @@ func parseStruct(value reflect.Value) []*Field {
 		}
 
 		field := &Field{
-			FieldMeta:  filedMeta,
-			Value:      fv.Interface(),
-			FieldValue: fv,
+			FieldMeta: filedMeta,
+			Value:     fv.Interface(),
 		}
 		fields = append(fields, field)
 	}
