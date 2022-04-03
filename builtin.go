@@ -26,8 +26,8 @@ const (
 )
 
 func registerBuiltin(q *Queryer) {
-	q.Register(Empty, EqQueryer)
-	q.Register(Eq, EqQueryer)
+	q.Register(Empty, QueryEq)
+	q.Register(Eq, QueryEq)
 	q.Register(Neq, func(f Field) clause.Expression {
 		return clause.Neq{
 			Column: f.ColumnName,
@@ -52,8 +52,8 @@ func registerBuiltin(q *Queryer) {
 			Value:  fmt.Sprintf("%v", f.Value) + `%`,
 		}
 	})
-	q.Register(In, EqQueryer)
-	q.Register(NotIn, NeqQueryer)
+	q.Register(In, QueryEq)
+	q.Register(NotIn, QueryNeq)
 	q.Register(Gt, func(f Field) clause.Expression {
 		return clause.Gt{
 			Column: f.ColumnName,
@@ -78,29 +78,29 @@ func registerBuiltin(q *Queryer) {
 			Value:  f.Value,
 		}
 	})
-	q.Register(JSONExtractEq, JSONExtractEqQueryer)
-	q.Register(JSONExtractLike, JSONExtractLikeQueryer)
+	q.Register(JSONExtractEq, QueryJSONExtractEq)
+	q.Register(JSONExtractLike, QueryJSONExtractLike)
 	// support for mysql
-	q.Register(MySQLJSONContains, MySQLJSONContainsQueryer)
+	q.Register(MySQLJSONContains, QueryMySQLJSONContains)
 	// unsafe raw sql
-	q.Register(UnsafeRawSQL, UnsafeRawSQLQueryer)
+	q.Register(UnsafeRawSQL, QueryUnsafeRawSQL)
 }
 
-func EqQueryer(field Field) clause.Expression {
+func QueryEq(field Field) clause.Expression {
 	return clause.Eq{
 		Column: field.ColumnName,
 		Value:  field.Value,
 	}
 }
 
-func NeqQueryer(field Field) clause.Expression {
+func QueryNeq(field Field) clause.Expression {
 	return clause.Neq{
 		Column: field.ColumnName,
 		Value:  field.Value,
 	}
 }
 
-func JSONExtractEqQueryer(field Field) clause.Expression {
+func QueryJSONExtractEq(field Field) clause.Expression {
 	jsonPath := field.FieldMeta.Options["path"]
 	if jsonPath == "" {
 		return nil
@@ -113,7 +113,7 @@ func JSONExtractEqQueryer(field Field) clause.Expression {
 	}
 }
 
-func JSONExtractLikeQueryer(field Field) clause.Expression {
+func QueryJSONExtractLike(field Field) clause.Expression {
 	jsonPath := field.FieldMeta.Options["path"]
 	if jsonPath == "" {
 		return nil
@@ -126,7 +126,7 @@ func JSONExtractLikeQueryer(field Field) clause.Expression {
 	}
 }
 
-func MySQLJSONContainsQueryer(field Field) clause.Expression {
+func QueryMySQLJSONContains(field Field) clause.Expression {
 	jsonPath := field.FieldMeta.Options["path"]
 
 	var sql string
@@ -142,7 +142,7 @@ func MySQLJSONContainsQueryer(field Field) clause.Expression {
 	}
 }
 
-func UnsafeRawSQLQueryer(field Field) clause.Expression {
+func QueryUnsafeRawSQL(field Field) clause.Expression {
 	return clause.NamedExpr{
 		SQL:  field.FieldMeta.Options["sql"],
 		Vars: []interface{}{field.Value},
