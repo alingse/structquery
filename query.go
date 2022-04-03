@@ -40,7 +40,7 @@ func NewQueryer() *Queryer {
 		queryFns: make(map[QueryType]QueryerFunc),
 		Namer:    schema.NamingStrategy{}, // default gorm namer
 	}
-	RegisterBuiltin(q)
+	registerBuiltin(q)
 	return q
 }
 

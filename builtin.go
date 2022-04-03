@@ -7,83 +7,83 @@ import (
 )
 
 const (
-	EmptyQueryType             QueryType = ""
-	EqQueryType                QueryType = "eq"
-	NeqQueryType               QueryType = "neq"
-	LikeQueryType              QueryType = "like"
-	LLikeQueryType             QueryType = "llike"
-	RLikeQueryType             QueryType = "rlike"
-	InQueryType                QueryType = "in"
-	NotInQueryType             QueryType = "not_in"
-	GtQueryType                QueryType = "gt"
-	GteQueryType               QueryType = "gte"
-	LtQueryType                QueryType = "lt"
-	LteQueryType               QueryType = "lte"
-	JSONExtractEqQueryType     QueryType = "json_extract_eq"
-	JSONExtractLikeQueryType   QueryType = "json_extract_like"
-	MySQLJSONContainsQueryType QueryType = "my_json_contains"
-	RawSQLQueryType            QueryType = "unsaferaw" // dangerous
+	Empty             QueryType = ""
+	Eq                QueryType = "eq"
+	Neq               QueryType = "neq"
+	Like              QueryType = "like"
+	LLike             QueryType = "llike"
+	RLike             QueryType = "rlike"
+	In                QueryType = "in"
+	NotIn             QueryType = "not_in"
+	Gt                QueryType = "gt"
+	Gte               QueryType = "gte"
+	Lt                QueryType = "lt"
+	Lte               QueryType = "lte"
+	JSONExtractEq     QueryType = "json_extract_eq"
+	JSONExtractLike   QueryType = "json_extract_like"
+	MySQLJSONContains QueryType = "my_json_contains"
+	UnsafeRawSQL      QueryType = "unsaferaw" // dangerous
 )
 
-func RegisterBuiltin(q *Queryer) {
-	q.Register(EmptyQueryType, EqQueryer)
-	q.Register(EqQueryType, EqQueryer)
-	q.Register(NeqQueryType, func(f Field) clause.Expression {
+func registerBuiltin(q *Queryer) {
+	q.Register(Empty, EqQueryer)
+	q.Register(Eq, EqQueryer)
+	q.Register(Neq, func(f Field) clause.Expression {
 		return clause.Neq{
 			Column: f.ColumnName,
 			Value:  f.Value,
 		}
 	})
-	q.Register(LikeQueryType, func(f Field) clause.Expression {
+	q.Register(Like, func(f Field) clause.Expression {
 		return clause.Like{
 			Column: f.ColumnName,
 			Value:  `%` + fmt.Sprintf("%v", f.Value) + `%`,
 		}
 	})
-	q.Register(LLikeQueryType, func(f Field) clause.Expression {
+	q.Register(LLike, func(f Field) clause.Expression {
 		return clause.Like{
 			Column: f.ColumnName,
 			Value:  `%` + fmt.Sprintf("%v", f.Value),
 		}
 	})
-	q.Register(RLikeQueryType, func(f Field) clause.Expression {
+	q.Register(RLike, func(f Field) clause.Expression {
 		return clause.Like{
 			Column: f.ColumnName,
 			Value:  fmt.Sprintf("%v", f.Value) + `%`,
 		}
 	})
-	q.Register(InQueryType, EqQueryer)
-	q.Register(NotInQueryType, NeqQueryer)
-	q.Register(GtQueryType, func(f Field) clause.Expression {
+	q.Register(In, EqQueryer)
+	q.Register(NotIn, NeqQueryer)
+	q.Register(Gt, func(f Field) clause.Expression {
 		return clause.Gt{
 			Column: f.ColumnName,
 			Value:  f.Value,
 		}
 	})
-	q.Register(GteQueryType, func(f Field) clause.Expression {
+	q.Register(Gte, func(f Field) clause.Expression {
 		return clause.Gte{
 			Column: f.ColumnName,
 			Value:  f.Value,
 		}
 	})
-	q.Register(LtQueryType, func(f Field) clause.Expression {
+	q.Register(Lt, func(f Field) clause.Expression {
 		return clause.Lt{
 			Column: f.ColumnName,
 			Value:  f.Value,
 		}
 	})
-	q.Register(LteQueryType, func(f Field) clause.Expression {
+	q.Register(Lte, func(f Field) clause.Expression {
 		return clause.Lte{
 			Column: f.ColumnName,
 			Value:  f.Value,
 		}
 	})
-	q.Register(JSONExtractEqQueryType, JSONExtractEqQueryer)
-	q.Register(JSONExtractLikeQueryType, JSONExtractLikeQueryer)
+	q.Register(JSONExtractEq, JSONExtractEqQueryer)
+	q.Register(JSONExtractLike, JSONExtractLikeQueryer)
 	// support for mysql
-	q.Register(MySQLJSONContainsQueryType, MySQLJSONContainsQueryer)
+	q.Register(MySQLJSONContains, MySQLJSONContainsQueryer)
 	// unsafe raw sql
-	q.Register(RawSQLQueryType, UnsafeRawSQLQueryer)
+	q.Register(UnsafeRawSQL, UnsafeRawSQLQueryer)
 }
 
 func EqQueryer(field Field) clause.Expression {
