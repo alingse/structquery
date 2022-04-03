@@ -23,3 +23,6 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Test on Sqlite3
+      run: cd tests && go test -v ./...
