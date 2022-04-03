@@ -5,7 +5,23 @@ import (
 	"strings"
 )
 
-func Parse(value interface{}) ([]*Field, error) {
+type FieldMeta struct {
+	Type        reflect.Type
+	QueryType   QueryType
+	Tag         string
+	Options     map[string]string
+	FieldName   string
+	IsAnonymous bool
+}
+
+type Field struct {
+	FieldMeta
+	Value      interface{}
+	FieldValue reflect.Value
+	ColumnName string
+}
+
+func ParseStruct(value interface{}) ([]*Field, error) {
 	v := reflect.ValueOf(value)
 	v = indirectValue(v)
 	if v.Kind() != reflect.Struct {

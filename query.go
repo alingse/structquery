@@ -3,30 +3,13 @@ package structquery
 import (
 	"errors"
 	"fmt"
-	"reflect"
 
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 )
 
-type FieldMeta struct {
-	Type        reflect.Type
-	QueryType   QueryType
-	Tag         string
-	Options     map[string]string
-	FieldName   string
-	IsAnonymous bool
-}
-
-type Field struct {
-	FieldMeta
-	Value      interface{}
-	FieldValue reflect.Value
-	ColumnName string
-}
-
 type QueryType string
-type QueryerFunc func(Field) clause.Expression
+type QueryerFunc func(f Field) clause.Expression
 
 type Queryer struct {
 	Namer    schema.Namer
@@ -44,8 +27,8 @@ func NewQueryer() *Queryer {
 	return q
 }
 
-func (q *Queryer) Register(qt QueryType, fn QueryerFunc) {
-	q.queryFns[qt] = fn
+func (q *Queryer) Register(t QueryType, fn QueryerFunc) {
+	q.queryFns[t] = fn
 }
 
 var (
@@ -53,24 +36,24 @@ var (
 	ErrBadQueryType  = errors.New("structquery: query type not registered")
 )
 
-func (q *Queryer) And(queryValue interface{}) (clause.Expression, error) {
-	exprs, err := q.toExprs(queryValue)
+func (q *Queryer) And(value interface{}) (clause.Expression, error) {
+	exprs, err := q.toExprs(value)
 	if err != nil {
 		return nil, err
 	}
 	return clause.And(exprs...), nil
 }
 
-func (q *Queryer) Or(queryValue interface{}) (clause.Expression, error) {
-	exprs, err := q.toExprs(queryValue)
+func (q *Queryer) Or(value interface{}) (clause.Expression, error) {
+	exprs, err := q.toExprs(value)
 	if err != nil {
 		return nil, err
 	}
 	return clause.Or(exprs...), nil
 }
 
-func (q *Queryer) toExprs(query interface{}) ([]clause.Expression, error) {
-	fields, err := Parse(query)
+func (q *Queryer) toExprs(value interface{}) ([]clause.Expression, error) {
+	fields, err := ParseStruct(value)
 	if err != nil {
 		return nil, err
 	}
