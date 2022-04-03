@@ -43,7 +43,7 @@ func parseStruct(value reflect.Value) []*Field {
 		f := valueType.Field(i)
 		fv := value.Field(i)
 
-		if valueType.Kind() == reflect.Ptr && fv.IsNil() {
+		if fv.Type().Kind() == reflect.Ptr && fv.IsNil() {
 			continue
 		}
 

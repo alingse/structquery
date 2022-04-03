@@ -1,6 +1,8 @@
 package structquery
 
-import "testing"
+import (
+	"testing"
+)
 
 type simpleQuery struct {
 	Email string `sq:"eq"`
@@ -99,6 +101,7 @@ func TestComplexQuery1(t *testing.T) {
 
 type complexQuery2 struct {
 	*complexQuery
+	Query *complexQuery `sq:"eq"`
 }
 
 func TestComplexQuery2(t *testing.T) {
@@ -148,4 +151,11 @@ func TestComplexQuery3Case1(t *testing.T) {
 	fields, err := ParseStruct(q)
 	assertEqual(t, err, nil)
 	assertEqual(t, len(fields), 1, fields)
+}
+
+func TestParseStructErr(t *testing.T) {
+	var itemID int = 1
+	fields, err := ParseStruct(itemID)
+	assertEqual(t, err, ErrBadQueryValue)
+	assertEqual(t, len(fields), 0)
 }

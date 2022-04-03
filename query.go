@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 )
@@ -30,9 +31,21 @@ func (q *Queryer) Register(t QueryType, fn QueryerFunc) {
 }
 
 var (
-	ErrBadQueryValue = errors.New("structquery: query must be a pointer to struct")
+	ErrBadQueryValue = errors.New("structquery: query must be struct or a pointer to struct")
 	ErrBadQueryType  = errors.New("structquery: query type not registered")
 )
+
+func (q *Queryer) Query(value interface{}) (clause.Expression, error) {
+	return q.And(value)
+}
+
+func (q *Queryer) Where(db *gorm.DB, value interface{}) (*gorm.DB, error) {
+	expr, err := q.And(value)
+	if err != nil {
+		return db, err
+	}
+	return db.Where(expr), nil
+}
 
 func (q *Queryer) And(value interface{}) (clause.Expression, error) {
 	exprs, err := q.toExprs(value)
