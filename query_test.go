@@ -1,6 +1,7 @@
 package structquery
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -52,7 +53,7 @@ func TestNewQueryerWithAnd(t *testing.T) {
 	var q = UserQuery{
 		Name:           "hello",
 		Email:          "",
-		ID:             0,
+		ID:             1,
 		CreatedAtStart: 1000000,
 		CreatedAtEnd:   2000000,
 		Tag:            "gorm",
@@ -82,12 +83,6 @@ func TestNewQueryerWithError(t *testing.T) {
 
 	_, err = queryer.Or(q)
 	assertEqual(t, err, nil)
-
-	var q2 struct {
-		Name string `sq:"not_exist"`
-	}
-	_, err = queryer.toExprs(&q2)
-	assertEqual(t, err, nil)
 }
 
 func TestMoreBuiltin(t *testing.T) {
@@ -112,4 +107,41 @@ func TestMoreBuiltin(t *testing.T) {
 	expr, err := queryer.And(&q)
 	assertEqual(t, err, nil)
 	assertNotEqual(t, expr, nil)
+}
+
+func TestQueryWithBadQueryType(t *testing.T) {
+	queryer := NewQueryer()
+
+	var q2 = struct {
+		Name string `sq:"not_exist"`
+	}{
+		Name: "hello",
+	}
+	var err error
+
+	_, err = queryer.toExprs(&q2)
+	assertEqual(t, errors.Is(err, ErrBadQueryType), true, err)
+	_, err = queryer.And(q2)
+	assertEqual(t, errors.Is(err, ErrBadQueryType), true, err)
+	_, err = queryer.Or(q2)
+	assertEqual(t, errors.Is(err, ErrBadQueryType), true, err)
+	_, err = queryer.Query(q2)
+	assertEqual(t, errors.Is(err, ErrBadQueryType), true, err)
+}
+
+func TestQueryWithBadQueryValue(t *testing.T) {
+	queryer := NewQueryer()
+	var q2 = "hello"
+	var err error
+
+	_, err = queryer.toExprs(q2)
+	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
+	_, err = queryer.And(q2)
+	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
+	_, err = queryer.Or(q2)
+	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
+	_, err = queryer.Query(q2)
+	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
+	_, err = queryer.Where(nil, q2)
+	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
 }
