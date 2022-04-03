@@ -11,7 +11,7 @@ func Parse(value interface{}) ([]*Field, error) {
 	if v.Kind() != reflect.Struct {
 		return nil, ErrBadQueryValue
 	}
-	fields := ParseStruct(v)
+	fields := parseStruct(v)
 	return fields, nil
 }
 
@@ -22,7 +22,7 @@ func indirectValue(value reflect.Value) reflect.Value {
 	return value
 }
 
-func ParseStruct(value reflect.Value) []*Field {
+func parseStruct(value reflect.Value) []*Field {
 	valueType := value.Type()
 	var fields = make([]*Field, 0, valueType.NumField())
 
@@ -38,7 +38,7 @@ func ParseStruct(value reflect.Value) []*Field {
 		if filedMeta.QueryType == "" && filedMeta.IsAnonymous {
 			fv = indirectValue(fv)
 			if fv.Type().Kind() == reflect.Struct {
-				anonymousFields := ParseStruct(fv)
+				anonymousFields := parseStruct(fv)
 				fields = append(fields, anonymousFields...)
 				continue
 			}
