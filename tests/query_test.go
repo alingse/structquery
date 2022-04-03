@@ -1,23 +1,37 @@
-package tests
+package tests_test
 
 import (
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 	"testing"
+
+	"github.com/alingse/structquery"
+	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
-func init() {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-	DB = db
+type UserQuery struct {
+	Name  string `sq:"like"`
+	Email string `sq:"eq"`
 }
 
-func TestDB(t *testing.T) {
-	if DB == nil {
+var queryer = structquery.NewQueryer()
+
+func TestUserQuery(t *testing.T) {
+	var q = UserQuery{
+		Name:  "hello",
+		Email: "a@b",
+	}
+	cond, err := queryer.And(q)
+	if err != nil {
 		t.Fail()
+	}
+
+	db := DB.Model(&User{})
+	users := []User{}
+	expectSQL := "SELECT * FROM `users` WHERE (`name` LIKE \"%hello%\" AND `email` = \"a@b\")"
+
+	sql := db.ToSQL(func(tx *gorm.DB) *gorm.DB {
+		return tx.Where(cond).Find(&users)
+	})
+	if sql != expectSQL {
+		t.Errorf("sql not equal, got %s", sql)
 	}
 }
