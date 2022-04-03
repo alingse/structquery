@@ -7,9 +7,9 @@ import (
 
 type FieldMeta struct {
 	QueryType   QueryType
-	Options     map[string]string
 	Name        string
-	IsAnonymous bool
+	Options     map[string]string
+	isAnonymous bool // internal use
 }
 
 type Field struct {
@@ -49,7 +49,7 @@ func parseStruct(value reflect.Value) []*Field {
 		}
 
 		filedMeta := toFieldInfo(f)
-		if filedMeta.QueryType == "" && filedMeta.IsAnonymous {
+		if filedMeta.QueryType == "" && filedMeta.isAnonymous {
 			fv = indirectValue(fv)
 			if fv.Type().Kind() == reflect.Struct {
 				anonymousFields := parseStruct(fv)
@@ -77,7 +77,7 @@ func toFieldInfo(field reflect.StructField) FieldMeta {
 	query, options := parseTag(tag)
 	return FieldMeta{
 		Name:        field.Name,
-		IsAnonymous: field.Anonymous,
+		isAnonymous: field.Anonymous,
 		QueryType:   QueryType(query),
 		Options:     options,
 	}
