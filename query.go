@@ -16,8 +16,6 @@ type Queryer struct {
 	queryFns map[QueryType]QueryerFunc
 }
 
-const defaultTag = `sq`
-
 func NewQueryer() *Queryer {
 	q := &Queryer{
 		queryFns: make(map[QueryType]QueryerFunc),
@@ -73,7 +71,12 @@ func (q *Queryer) translate(fields []*Field) ([]clause.Expression, error) {
 		}
 
 		f := *field
-		f.ColumnName = q.Namer.ColumnName("", field.Name)
+
+		// get column name from options
+		f.ColumnName = f.Options[OptionColumn]
+		if f.ColumnName == "" {
+			f.ColumnName = q.Namer.ColumnName(f.Options[OptionTable], field.Name)
+		}
 
 		expr := fn(f)
 		if expr != nil {

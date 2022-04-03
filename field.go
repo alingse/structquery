@@ -70,6 +70,12 @@ func parseStruct(value reflect.Value) []*Field {
 	return fields
 }
 
+const (
+	defaultTag   = `sq`
+	OptionColumn = `column`
+	OptionTable  = `table`
+)
+
 func toFieldInfo(field reflect.StructField) FieldMeta {
 	tag := field.Tag.Get(defaultTag)
 	query, options := parseTag(tag)
