@@ -29,6 +29,7 @@ func ParseStruct(value reflect.Value) []*Field {
 	for i := 0; i < valueType.NumField(); i++ {
 		f := valueType.Field(i)
 		fv := value.Field(i)
+
 		if valueType.Kind() == reflect.Ptr && fv.IsNil() {
 			continue
 		}
@@ -47,19 +48,20 @@ func ParseStruct(value reflect.Value) []*Field {
 			continue
 		}
 
-		fields = append(fields, &Field{
-			FieldMeta:  *filedMeta,
+		field := &Field{
+			FieldMeta:  filedMeta,
 			Value:      fv.Interface(),
 			FieldValue: fv,
-		})
+		}
+		fields = append(fields, field)
 	}
 	return fields
 }
 
-func toFieldInfo(field reflect.StructField) *FieldMeta {
+func toFieldInfo(field reflect.StructField) FieldMeta {
 	tag := field.Tag.Get(defaultTag)
 	query, options := parseTag(tag)
-	return &FieldMeta{
+	return FieldMeta{
 		Type:        field.Type,
 		FieldName:   field.Name,
 		IsAnonymous: field.Anonymous,
