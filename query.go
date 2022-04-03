@@ -77,7 +77,7 @@ func (q *Queryer) toExprs(query interface{}) ([]clause.Expression, error) {
 	return q.translate(fields)
 }
 
-func (q *Queryer) translate(fields []*fieldWithValue) ([]clause.Expression, error) {
+func (q *Queryer) translate(fields []*Field) ([]clause.Expression, error) {
 	var exprs []clause.Expression
 	for _, field := range fields {
 		if field.QueryType == "" {
@@ -88,14 +88,10 @@ func (q *Queryer) translate(fields []*fieldWithValue) ([]clause.Expression, erro
 		if !ok {
 			return nil, fmt.Errorf("%w:%s ", ErrBadQueryType, queryType)
 		}
-		meta := *field.FieldMeta
 
-		f := Field{
-			FieldMeta:  meta,
-			Value:      field.value,
-			FieldValue: field.fieldValue,
-			ColumnName: q.Namer.ColumnName("", field.FieldName),
-		}
+		f := *field
+		f.ColumnName = q.Namer.ColumnName("", field.FieldName)
+
 		expr := fn(f)
 		if expr != nil {
 			exprs = append(exprs, expr)

@@ -5,13 +5,7 @@ import (
 	"strings"
 )
 
-type fieldWithValue struct {
-	*FieldMeta
-	value      interface{}
-	fieldValue reflect.Value
-}
-
-func parseValue(value interface{}) ([]*fieldWithValue, error) {
+func parseValue(value interface{}) ([]*Field, error) {
 	v := reflect.ValueOf(value)
 	v = indirectValue(v)
 	if v.Kind() != reflect.Struct {
@@ -28,9 +22,10 @@ func indirectValue(value reflect.Value) reflect.Value {
 	return value
 }
 
-func parseStruct(value reflect.Value) []*fieldWithValue {
+func parseStruct(value reflect.Value) []*Field {
 	valueType := value.Type()
-	var fields = make([]*fieldWithValue, 0, valueType.NumField())
+	var fields = make([]*Field, 0, valueType.NumField())
+
 	for i := 0; i < valueType.NumField(); i++ {
 		f := valueType.Field(i)
 		fv := value.Field(i)
@@ -52,10 +47,10 @@ func parseStruct(value reflect.Value) []*fieldWithValue {
 			continue
 		}
 
-		fields = append(fields, &fieldWithValue{
-			FieldMeta:  filedMeta,
-			value:      fv.Interface(),
-			fieldValue: fv,
+		fields = append(fields, &Field{
+			FieldMeta:  *filedMeta,
+			Value:      fv.Interface(),
+			FieldValue: fv,
 		})
 	}
 	return fields
