@@ -5,17 +5,8 @@ import (
 	"strings"
 )
 
-type fieldInfo struct {
-	typ         reflect.Type
-	name        string
-	isAnonymous bool
-	tag         string
-	query       string
-	options     map[string]string
-}
-
 type fieldWithValue struct {
-	*fieldInfo
+	*FieldMeta
 	value      interface{}
 	fieldValue reflect.Value
 }
@@ -48,7 +39,7 @@ func parseStruct(value reflect.Value) []*fieldWithValue {
 		}
 
 		filedMeta := toFieldInfo(f)
-		if filedMeta.query == "" && filedMeta.isAnonymous {
+		if filedMeta.QueryType == "" && filedMeta.IsAnonymous {
 			fv = indirectValue(fv)
 			if fv.Type().Kind() == reflect.Struct {
 				anonymousFields := parseStruct(fv)
@@ -62,7 +53,7 @@ func parseStruct(value reflect.Value) []*fieldWithValue {
 		}
 
 		fields = append(fields, &fieldWithValue{
-			fieldInfo:  filedMeta,
+			FieldMeta:  filedMeta,
 			value:      fv.Interface(),
 			fieldValue: fv,
 		})
@@ -70,16 +61,16 @@ func parseStruct(value reflect.Value) []*fieldWithValue {
 	return fields
 }
 
-func toFieldInfo(field reflect.StructField) *fieldInfo {
+func toFieldInfo(field reflect.StructField) *FieldMeta {
 	tag := field.Tag.Get(defaultTag)
 	query, options := parseTag(tag)
-	return &fieldInfo{
-		typ:         field.Type,
-		name:        field.Name,
-		isAnonymous: field.Anonymous,
-		tag:         tag,
-		query:       query,
-		options:     options,
+	return &FieldMeta{
+		Type:        field.Type,
+		FieldName:   field.Name,
+		IsAnonymous: field.Anonymous,
+		Tag:         tag,
+		QueryType:   QueryType(query),
+		Options:     options,
 	}
 }
 

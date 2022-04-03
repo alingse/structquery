@@ -12,6 +12,7 @@ import (
 type FieldMeta struct {
 	Type        reflect.Type
 	QueryType   QueryType
+	Tag         string
 	Options     map[string]string
 	FieldName   string
 	IsAnonymous bool
@@ -79,24 +80,19 @@ func (q *Queryer) toExprs(query interface{}) ([]clause.Expression, error) {
 func (q *Queryer) translate(fields []*fieldWithValue) ([]clause.Expression, error) {
 	var exprs []clause.Expression
 	for _, field := range fields {
-		if field.query == "" {
+		if field.QueryType == "" {
 			continue
 		}
-		queryType := QueryType(field.query)
+		queryType := field.QueryType
 		fn, ok := q.queryFns[queryType]
 		if !ok {
 			return nil, fmt.Errorf("%w:%s ", ErrBadQueryType, queryType)
 		}
-		meta := FieldMeta{
-			Type:      field.typ,
-			QueryType: queryType,
-			Options:   field.options,
-			FieldName: field.name,
-		}
+		meta := *field.FieldMeta
 
 		f := Field{
 			FieldMeta:  meta,
-			ColumnName: q.Namer.ColumnName("", field.name),
+			ColumnName: q.Namer.ColumnName("", field.FieldName),
 			Value:      field.value,
 			FieldValue: field.fieldValue,
 		}
