@@ -20,9 +20,9 @@ type FieldMeta struct {
 
 type Field struct {
 	FieldMeta
-	ColumnName string
 	Value      interface{}
 	FieldValue reflect.Value
+	ColumnName string
 }
 
 type QueryType string
@@ -92,9 +92,9 @@ func (q *Queryer) translate(fields []*fieldWithValue) ([]clause.Expression, erro
 
 		f := Field{
 			FieldMeta:  meta,
-			ColumnName: q.Namer.ColumnName("", field.FieldName),
 			Value:      field.value,
 			FieldValue: field.fieldValue,
+			ColumnName: q.Namer.ColumnName("", field.FieldName),
 		}
 		expr := fn(f)
 		if expr != nil {
