@@ -6,11 +6,9 @@ import (
 )
 
 type FieldMeta struct {
-	Type        reflect.Type
 	QueryType   QueryType
-	Tag         string
 	Options     map[string]string
-	FieldName   string
+	Name        string
 	IsAnonymous bool
 }
 
@@ -18,7 +16,7 @@ type Field struct {
 	FieldMeta
 	Value      interface{}
 	FieldValue reflect.Value
-	ColumnName string
+	ColumnName string // TODO: add read from options
 }
 
 func ParseStruct(value interface{}) ([]*Field, error) {
@@ -78,10 +76,8 @@ func toFieldInfo(field reflect.StructField) FieldMeta {
 	tag := field.Tag.Get(defaultTag)
 	query, options := parseTag(tag)
 	return FieldMeta{
-		Type:        field.Type,
-		FieldName:   field.Name,
+		Name:        field.Name,
 		IsAnonymous: field.Anonymous,
-		Tag:         tag,
 		QueryType:   QueryType(query),
 		Options:     options,
 	}

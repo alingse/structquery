@@ -73,7 +73,7 @@ func (q *Queryer) translate(fields []*Field) ([]clause.Expression, error) {
 		}
 
 		f := *field
-		f.ColumnName = q.Namer.ColumnName("", field.FieldName)
+		f.ColumnName = q.Namer.ColumnName("", field.Name)
 
 		expr := fn(f)
 		if expr != nil {
