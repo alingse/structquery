@@ -70,7 +70,7 @@ func (q *Queryer) Or(queryValue interface{}) (clause.Expression, error) {
 }
 
 func (q *Queryer) toExprs(query interface{}) ([]clause.Expression, error) {
-	fields, err := parseValue(query)
+	fields, err := Parse(query)
 	if err != nil {
 		return nil, err
 	}
