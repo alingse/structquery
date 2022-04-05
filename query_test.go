@@ -125,8 +125,6 @@ func TestQueryWithBadQueryType(t *testing.T) {
 	assertEqual(t, errors.Is(err, ErrBadQueryType), true, err)
 	_, err = queryer.Or(q2)
 	assertEqual(t, errors.Is(err, ErrBadQueryType), true, err)
-	_, err = queryer.Query(q2)
-	assertEqual(t, errors.Is(err, ErrBadQueryType), true, err)
 }
 
 func TestQueryWithBadQueryValue(t *testing.T) {
@@ -139,8 +137,6 @@ func TestQueryWithBadQueryValue(t *testing.T) {
 	_, err = queryer.And(q2)
 	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
 	_, err = queryer.Or(q2)
-	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
-	_, err = queryer.Query(q2)
 	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
 	_, err = queryer.Where(nil, q2)
 	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)

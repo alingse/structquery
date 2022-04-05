@@ -35,10 +35,6 @@ var (
 	ErrBadQueryType  = errors.New("structquery: query type not registered")
 )
 
-func (q *Queryer) Query(value interface{}) (clause.Expression, error) {
-	return q.And(value)
-}
-
 func (q *Queryer) Where(db *gorm.DB, value interface{}) (*gorm.DB, error) {
 	expr, err := q.And(value)
 	if err != nil {
