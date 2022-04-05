@@ -28,12 +28,7 @@ const (
 func registerBuiltin(q *Queryer) {
 	q.Register(Empty, queryEq)
 	q.Register(Eq, queryEq)
-	q.Register(Neq, func(f Field) clause.Expression {
-		return clause.Neq{
-			Column: f.ColumnName,
-			Value:  f.Value,
-		}
-	})
+	q.Register(Neq, queryNeq)
 	q.Register(Like, func(f Field) clause.Expression {
 		return clause.Like{
 			Column: f.ColumnName,
