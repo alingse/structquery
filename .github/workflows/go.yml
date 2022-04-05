@@ -36,4 +36,4 @@ jobs:
       run: mysql -uroot -h127.0.0.1 -e 'CREATE DATABASE IF NOT EXISTS structquery;'
 
     - name: Test on MySQL
-      run: cd tests && go test -v ./...
+      run: cd tests && go test -run "MySQL"
