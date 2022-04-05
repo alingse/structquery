@@ -26,3 +26,14 @@ jobs:
 
     - name: Test on Sqlite3
       run: cd tests && go test -v ./...
+
+    - name: Setup MySQL
+      uses: shogo82148/actions-setup-mysql@v1
+      with:
+        mysql-version: '8.0'
+
+    - name: Prepare MySQL
+      run: mysql -uroot -h127.0.0.1 -e 'CREATE DATABASE IF NOT EXISTS structquery;'
+
+    - name: Test on MySQL
+      run: cd tests && go test -run "MySQL"
