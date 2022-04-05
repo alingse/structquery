@@ -33,4 +33,4 @@ jobs:
       run: cd tests && go test -v ./...
 
     - name: Test on MySQL
-      run: mysql -uroot -h127.0.0.1 -e 'SELECT version()'
+      run: mysql -uroot -h127.0.0.1 -e 'CREATE DATABASE IF NOT EXISTS structquery;'
