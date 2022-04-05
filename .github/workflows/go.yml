@@ -18,6 +18,11 @@ jobs:
       with:
         go-version: 1.18
 
+    - name: Setup MySQL
+      uses: shogo82148/actions-setup-mysql@v1
+      with:
+        mysql-version: '8.0'
+
     - name: Build
       run: go build -v ./...
 
@@ -28,7 +33,4 @@ jobs:
       run: cd tests && go test -v ./...
 
     - name: Test on MySQL
-      uses: shogo82148/actions-setup-mysql@v1
-      with:
-        mysql-version: '8.0'
       run: mysql -uroot -h127.0.0.1 -e 'SELECT version()'
