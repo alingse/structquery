@@ -39,12 +39,16 @@ func TestNewQueryer(t *testing.T) {
 }
 
 type UserQuery struct {
-	Name           string `sq:"like"`
-	Email          string `sq:"eq"`
-	ID             int    `sq:""`
-	CreatedAtStart int64  `sq:"gte;column:created_at"`
-	CreatedAtEnd   int64  `sq:"lt;column:created_at"`
-	Tag            string `sq:"json_extract_like;column:tags;path:$[*].name"`
+	Name           string   `sq:"like"`
+	Email          string   `sq:"eq"`
+	ID             int      `sq:""`
+	CreatedAtStart int64    `sq:"gte;column:created_at"`
+	CreatedAtEnd   int64    `sq:"lt;column:created_at"`
+	Names          []string `sq:"in"`
+	Tag            string   `sq:"json_extract_like;column:tags;path:$[*].name"`
+	CateIds        []int64  `sq:"unsaferaw;sql: cat_id IN (?)"`
+	TopicID        int64    `sq:"my_json_contains;column:topics"`
+	ExcludeID      int64    `sq:"neq;column:id"`
 }
 
 func TestNewQueryerWithAnd(t *testing.T) {
@@ -57,6 +61,10 @@ func TestNewQueryerWithAnd(t *testing.T) {
 		CreatedAtStart: 1000000,
 		CreatedAtEnd:   2000000,
 		Tag:            "gorm",
+		Names:          []string{"data"},
+		CateIds:        []int64{100, 200},
+		TopicID:        100,
+		ExcludeID:      300,
 	}
 	exprs, err := queryer.toExprs(&q)
 	assertEqual(t, err, nil)
@@ -125,8 +133,6 @@ func TestQueryWithBadQueryType(t *testing.T) {
 	assertEqual(t, errors.Is(err, ErrBadQueryType), true, err)
 	_, err = queryer.Or(q2)
 	assertEqual(t, errors.Is(err, ErrBadQueryType), true, err)
-	_, err = queryer.Query(q2)
-	assertEqual(t, errors.Is(err, ErrBadQueryType), true, err)
 }
 
 func TestQueryWithBadQueryValue(t *testing.T) {
@@ -139,8 +145,6 @@ func TestQueryWithBadQueryValue(t *testing.T) {
 	_, err = queryer.And(q2)
 	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
 	_, err = queryer.Or(q2)
-	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
-	_, err = queryer.Query(q2)
 	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
 	_, err = queryer.Where(nil, q2)
 	assertEqual(t, errors.Is(err, ErrBadQueryValue), true, err)
