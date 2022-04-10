@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserQuery struct {
+type UserModelQuery struct {
 	Name  string `sq:"like"`
 	Email string `sq:"eq"`
 }
@@ -15,10 +15,11 @@ type UserQuery struct {
 var queryer = structquery.NewQueryer()
 
 func TestUserQuery(t *testing.T) {
-	var q = UserQuery{
+	var q = UserModelQuery{
 		Name:  "hello",
 		Email: "a@b",
 	}
+
 	cond, err := queryer.And(q)
 	if err != nil {
 		t.Fail()
