@@ -51,5 +51,5 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	db.Find(&users)
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(users)
+	_ = json.NewEncoder(w).Encode(users)
 }
