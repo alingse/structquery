@@ -7,6 +7,8 @@ gorm query with struct
 package main
 
 import (
+	"fmt"
+
 	"github.com/alingse/structquery"
 	"gorm.io/gorm"
 )
@@ -39,11 +41,11 @@ func main() {
 	users := []User{}
 
 	sql := db.ToSQL(func(tx *gorm.DB) *gorm.DB {
-        tx, _ = queryer.Where(tx, q)
-        return tx.Find(&users)
+		tx, _ = queryer.Where(tx, q)
+		return tx.Find(&users)
 	})
-    // SELECT * FROM `users` WHERE (`name` LIKE "%hello%" AND `email` = "a@b")
-    fmt.Println(sql)
+	// SELECT * FROM `users` WHERE (`name` LIKE "%hello%" AND `email` = "a@b")
+	fmt.Println(sql)
 }
 ```
 
@@ -89,7 +91,7 @@ func (u UserModel) TableName() string {
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	var query UserQuery
 
-    // decode from URL.Query()
+	// decode from URL.Query()
 	err := queryDecoder.Decode(&query, r.URL.Query())
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -97,7 +99,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	db := GormDB.Model(&UserModel{})
 
-    // auto add Where with sq tag
+	// auto add Where with sq tag
 	db, err = structQueryer.Where(db, query)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
