@@ -13,6 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// DB ----------------------------------------------------------
 type UserModel struct {
 	gorm.Model
 	Name  string `json:"name"`
@@ -23,13 +24,14 @@ func (u UserModel) TableName() string {
 	return "users"
 }
 
+var DB = initGormDB()
+
+var queryer = structquery.NewQueryer()
+
 type UserModelQuery struct {
 	Name  string `sq:"like"`
 	Email string `sq:"eq"`
 }
-
-var DB = initGormDB()
-var queryer = structquery.NewQueryer()
 
 func main() {
 	var q = UserModelQuery{
@@ -38,9 +40,10 @@ func main() {
 	}
 
 	db := DB.Model(&User{})
-	users := []User{}
 
 	sql := db.ToSQL(func(tx *gorm.DB) *gorm.DB {
+		var users []User
+
 		tx, _ = queryer.Where(tx, q)
 		return tx.Find(&users)
 	})
@@ -63,20 +66,8 @@ import (
 	"gorm.io/gorm"
 )
 
-var structQueryer = structquery.NewQueryer()
-
+// DB -------------------------------------------------------------------------
 var GormDB *gorm.DB
-var queryDecoder = schema.NewDecoder()
-
-func init() {
-	queryDecoder.IgnoreUnknownKeys(true)
-	queryDecoder.SetAliasTag("json")
-}
-
-type UserQuery struct {
-	Name  string `json:"name"  sq:"like"`
-	Email string `json:"email" sq:"eq"`
-}
 
 type UserModel struct {
 	gorm.Model
@@ -88,28 +79,46 @@ func (u UserModel) TableName() string {
 	return "users"
 }
 
+// HTTP -----------------------------------------------------------------------
+var queryDecoder = schema.NewDecoder()
+
+func init() {
+	queryDecoder.IgnoreUnknownKeys(true)
+	queryDecoder.SetAliasTag("json")
+}
+
+// Query ----------------------------------------------------------------------
+
+type UserQuery struct {
+	Name  string `json:"name"  sq:"like"`
+	Email string `json:"email" sq:"eq"`
+}
+
+var structQueryer = structquery.NewQueryer()
+
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	var query UserQuery
 
-	// decode from URL.Query()
+	// decode from URL
 	err := queryDecoder.Decode(&query, r.URL.Query())
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	db := GormDB.Model(&UserModel{})
-
-	// auto add Where with sq tag
+	// bind queryer
 	db, err = structQueryer.Where(db, query)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	var users []UserModel
 	db.Find(&users)
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(users)
+	_ = json.NewEncoder(w).Encode(users)
 }
 ```
 

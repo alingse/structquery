@@ -9,19 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// DB -------------------------------------------------------------------------
 var GormDB *gorm.DB
-var queryDecoder = schema.NewDecoder()
-var structQueryer = structquery.NewQueryer()
-
-func init() {
-	queryDecoder.IgnoreUnknownKeys(true)
-	queryDecoder.SetAliasTag("json")
-}
-
-type UserQuery struct {
-	Name  string `json:"name"  sq:"like"`
-	Email string `json:"email" sq:"eq"`
-}
 
 type UserModel struct {
 	gorm.Model
@@ -33,18 +22,39 @@ func (u UserModel) TableName() string {
 	return "users"
 }
 
+// HTTP -----------------------------------------------------------------------
+var queryDecoder = schema.NewDecoder()
+
+func init() {
+	queryDecoder.IgnoreUnknownKeys(true)
+	queryDecoder.SetAliasTag("json")
+}
+
+// Query ----------------------------------------------------------------------
+
+type UserQuery struct {
+	Name  string `json:"name"  sq:"like"`
+	Email string `json:"email" sq:"eq"`
+}
+
+var structQueryer = structquery.NewQueryer()
+
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	var query UserQuery
 
+	// decode from URL
 	err := queryDecoder.Decode(&query, r.URL.Query())
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	db := GormDB.Model(&UserModel{})
+	// bind queryer
 	db, err = structQueryer.Where(db, query)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	var users []UserModel
